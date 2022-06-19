@@ -215,8 +215,116 @@ def aktivitas():
         return render_template('aktivitas/index.html',data=data)
     return render_template('aktivitas/index.html')
 
+@app.route("/aktivitas/add",methods=['GET','POST'])
+@AuthMiddleware.login_required
+def aktivitas_add():
+    data = {
+        'page_title' : 'Tambah Aktivitas',
+    }
+    if request.method=='GET':
+        return redirect(url_for('aktivitas'))
+    if request.method=='POST':
+        data = {
+            'page_title' : 'Tambah Aktivitas',
+        }
+        users_id = session['users_id']
+        nama_aktivitas = request.form['nama_aktivitas']
+        tanggal_aktivitas = request.form['tanggal_aktivitas']
+        waktu_aktivitas = request.form['waktu_aktivitas']
+        status_aktivitas = 'on-going'
+        created_at = str(datetime.datetime.now())
+        sql = f"INSERT INTO aktivitass VALUES(NULL,'{users_id}','{nama_aktivitas}','{tanggal_aktivitas}','{waktu_aktivitas}','{status_aktivitas}','{created_at}',NULL)"
+        Model.cur.execute(sql)
+        if(Model.cur.rowcount):
+            msg = f"{Model.cur.rowcount} row inserted";
+            flash(msg,'success')
+        else:
+            msg = f"tambah aktivitas failed";
+            flash(msg,'danger')
+        return redirect(url_for('aktivitas'))
+        try:
+            nama_aktivitas = request.name['nama_aktivitas']
+            tanggal_aktivitas = request.name['tanggal_aktivitas']
+            waktu_aktivitas = request.name['waktu_aktivitas']
+            status_aktivitas = 'on-going'
+            created_at = str(datetime.datetime.now())
+            sql = f"INSERT INTO aktivitass VALUES(NULL,'{users_id}','{nama_aktivitas}','{tanggal_aktivitas}','{waktu_aktivitas}','{status_aktivitas}','{created_at}',NULL)"
+            Model.cur.execute(sql)
+            if(Model.cur.rowcount):
+                msg = f"{Model.cur.rowcount} row inserted";
+                flash(msg,'success')
+            else:
+                msg = f"tambah aktivitas failed";
+                flash(msg,'danger')
+            return redirect(url_for('aktivitas'))
+        except Exception as e:
+            print(e)
+            flash('Server Error','danger')
+            return redirect(url_for('aktivitas'))
+    return redirect(url_for('aktivitas'))
 
+@app.route("/aktivitas/edit",methods=['POST'])
+@AuthMiddleware.login_required
+def aktivitas_edit():
+    data = {
+        'page_title' : 'Edit Aktivitas',
+    }
+    user_id = session['users_id']
+    if request.method=='POST':
+        try:
+            aktivitass_id = request.form['aktivitass_id']
+            nama_aktivitas = request.form['nama_aktivitas']
+            tanggal_aktivitas = request.form['tanggal_aktivitas']
+            waktu_aktivitas = request.form['waktu_aktivitas']
+            status_aktivitas  = request.form['status_aktivitas']
+            deleted_at = str(datetime.datetime.now())
+            sql = f'''UPDATE aktivitass SET 
+                nama_aktivitas = '{nama_aktivitas}' , 
+                tanggal_aktivitas = '{tanggal_aktivitas}' , 
+                waktu_aktivitas = '{waktu_aktivitas}' ,
+                status_aktivitas = '{status_aktivitas}'
+                where aktivitass_id = '{aktivitass_id}' and user_id = '{user_id}' and deleted_at is NULL'''
+            print(sql)
+            Model.cur.execute(sql)
+            if(Model.cur.rowcount):
+                msg = f"{Model.cur.rowcount} row updated";
+                flash(msg,'success')
+            else:
+                msg = f"delete failed";
+                flash(msg,'danger')
+            return redirect(url_for('aktivitas'))
+        except Exception as e:
+            print(e)
+            flash('Server Error','danger')
+            return redirect(url_for('aktivitas'))
 
+@app.route("/aktivitas/delete",methods=['POST'])
+@AuthMiddleware.login_required
+def aktivitas_delete():
+    data = {
+        'page_title' : 'Delete Absensi',
+    }
+    if request.method=='POST':
+        data = {
+            'page_title' : 'Delete Absensi',
+        }
+        try:
+            aktivitas_id = request.form['aktivitas_id']
+            user_id = session['users_id']
+            deleted_at = str(datetime.datetime.now())
+            sql = f"UPDATE aktivitass SET deleted_at = '{deleted_at}' where aktivitass_id = '{aktivitas_id}' and user_id = '{user_id}' and deleted_at is NULL"
+            Model.cur.execute(sql)
+            if(Model.cur.rowcount):
+                msg = f"{Model.cur.rowcount} row deleted";
+                flash(msg,'success')
+            else:
+                msg = f"delete failed";
+                flash(msg,'danger')
+            return redirect(url_for('aktivitas'))
+        except Exception as e:
+            print(e)
+            flash('Server Error','danger')
+            return redirect(url_for('aktivitas'))
 
 if __name__=='__main__':
     sess.init_app(app)

@@ -2,10 +2,17 @@
 
 {% block optional_header %}
 <!-- Custom styles for this page -->
-<link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+<link href="{{ url_for('static',filename='core/') }}vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
+
+<div class="row pb-4">
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary float-right" data-toggle="modal" data-target="#addModal">
+            <i class="fa fa-plus"></i> Tambah Aktivitas</button>
+    </div>
+</div>
 
 <!-- DataTales Example -->
 <div class="card shadow mb-4">
@@ -19,6 +26,7 @@
                         <th>Tanggal Aktivitas</th>
                         <th>Waktu Aktivitas</th>
                         <th>Status Aktivitas</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -28,7 +36,29 @@
                         <td>{{ aktivitas.nama_aktivitas }}</td>
                         <td>{{ aktivitas.tanggal_aktivitas }}</td>
                         <td>{{ aktivitas.waktu_aktivitas }}</td>
-                        <td>{{ aktivitas.status_aktivitas }}</td>
+                        <td>
+                            {% if aktivitas.status_aktivitas == 'on-going' %}
+                                <span class="text-warning">{{ aktivitas.status_aktivitas }}</span>
+                            {% elif aktivitas.status_aktivitas == 'finished' %}
+                                <span class="text-success">{{ aktivitas.status_aktivitas }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex">
+                                <div class="px-1">
+                                    <button class="btn btn-warning" data-toggle="modal" data-target="#editModal"
+                                        data-id="{{ aktivitas.aktivitass_id }}" 
+                                        data-nama="{{ aktivitas.nama_aktivitas }}"
+                                        data-tanggal="{{ aktivitas.tanggal_aktivitas }}"
+                                        data-waktu="{{ aktivitas.waktu_aktivitas }}"
+                                        data-status="{{ aktivitas.status_aktivitas }}"><i class="fa fa-edit"></i></button>
+                                </div>
+                                <div class="px-1">
+                                    <button class="btn btn-danger" data-toggle="modal" data-target="#deleteModal"
+                                        data-id="{{ aktivitas.aktivitass_id }}"><i class="fa fa-trash"></i></button>
+                                </div>
+                            </div>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -36,15 +66,149 @@
         </div>
     </div>
 </div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addModalLabel">Modal Tambah</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('aktivitas_add') }}" method="POST" class="form-row">
+                    <div class="col-lg-12 mt-3">
+                        <label for="nama_aktivitas" class="text-gray-900 font-weight-bold">Nama Aktivitas</label>
+                        <input type="text" name="nama_aktivitas" id="nama_aktivitas"
+                            class="form-control border-left-primary" required="">
+                    </div>
+                    <div class="col-lg-12 mt-3">
+                        <label for="tanggal_aktivitas" class="text-gray-900 font-weight-bold">Tanggal Aktivitas</label>
+                        <input type="date" name="tanggal_aktivitas" id="tanggal_aktivitas"
+                            class="form-control border-left-primary" required="">
+                    </div>
+                    <div class="col-lg-12 mt-3">
+                        <label for="waktu_aktivitas" class="text-gray-900 font-weight-bold">Waktu Aktivitas</label>
+                        <input type="time" name="waktu_aktivitas" id="waktu_aktivitas"
+                            class="form-control border-left-primary" required="">
+                    </div>
+                    <div class="col-lg-12 mt-3">
+                        <input type="submit" class="btn btn-success float-right" value="Tambah">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Modal Edit - Data : <span id="edit_modal_id"></span></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('aktivitas_edit') }}" method="POST" class="form-row" id="deleteForm">
+                    <input type="hidden" name="aktivitass_id" id="edit_aktivitass_id">
+                    <div class="col-lg-12 mt-3">
+                        <label for="edit_nama_aktivitas" class="text-gray-900 font-weight-bold">Nama Aktivitas</label>
+                        <input type="text" name="nama_aktivitas" id="edit_nama_aktivitas"
+                            class="form-control border-left-primary" required="">
+                    </div>
+                    <div class="col-lg-12 mt-3">
+                        <label for="edit_tanggal_aktivitas" class="text-gray-900 font-weight-bold">Tanggal Aktivitas</label>
+                        <input type="date" name="tanggal_aktivitas" id="edit_tanggal_aktivitas"
+                            class="form-control border-left-primary" required="">
+                    </div>
+                    <div class="col-lg-12 mt-3">
+                        <label for="edit_waktu_aktivitas" class="text-gray-900 font-weight-bold">Waktu Aktivitas</label>
+                        <input type="time" name="waktu_aktivitas" id="edit_waktu_aktivitas"
+                            class="form-control border-left-primary" required="">
+                    </div>
+                    <div class="col-lg-12 mt-3">
+                        <label for="edit_status_aktivitas" class="text-gray-900 font-weight-bold">Status Aktivitas</label>
+                        <select name="status_aktivitas" id="edit_status_aktivitas" class="form-control border-left-primary">
+                            <option value="on-going">on-going</option>
+                            <option value="finished">finished</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-12 mt-3">
+                        <input type="submit" class="btn btn-warning float-right" value="Edit">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Modal Delete</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Delete data with id : <span id="delete-text-id"></span>
+                <form action="{{ url_for('aktivitas_delete') }}" method="POST">
+                    <input type="hidden" name="aktivitas_id" id="delete_id">
+                    <input type="submit" class="btn btn-danger float-right" value="Delete">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block optional_footer %}
 
 <!-- Page level plugins -->
-<script src="vendor/datatables/jquery.dataTables.min.js"></script>
-<script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+<script src="{{ url_for('static',filename='core/') }}vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="{{ url_for('static',filename='core/') }}vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
 <!-- Page level custom scripts -->
-<script src="js/demo/datatables-demo.js"></script>
+<script src="{{ url_for('static',filename='core/') }}js/demo/datatables-demo.js"></script>
+
+<script>
+    $('#editModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var aktivitass_id = button.data('id')
+        var nama_aktivitas = button.data('nama')
+        var tanggal_aktivitas = button.data('tanggal') 
+        var waktu_aktivitas = button.data('waktu')
+        var status_aktivitas = button.data('status')
+        $('#edit_modal_id').html(aktivitass_id)
+        $('#edit_aktivitass_id').val(aktivitass_id)
+        $('#edit_nama_aktivitas').val(nama_aktivitas)
+        $('#edit_tanggal_aktivitas').val(tanggal_aktivitas)
+        $('#edit_waktu_aktivitas').val(waktu_aktivitas)
+        $('#edit_status_aktivitas').val(status_aktivitas).change()
+    })
+
+    $('#deleteModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var aktivitass_id = button.data('id') // Extract info from data-* attributes
+        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+        // var modal = $(this)
+        // modal.find('.modal-title').text('New message to ' + recipient)
+        // modal.find('.modal-body input').val(recipient)
+        $('#delete-text-id').html(aktivitass_id)
+        $('#delete_id').val(aktivitass_id)
+    })
+
+</script>
 
 {% endblock %}
