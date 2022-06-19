@@ -3,10 +3,9 @@ import sqlite3 as sql
 import json
 import AuthMiddleware
 import Model
+import datetime
 app=Flask(__name__)
 app.secret_key='secret'
-
-
 
 
 @app.route("/index")
@@ -21,14 +20,6 @@ def index():
 
 @app.route("/login", methods=['GET','POST'])
 def login():
-    # print(request.method)
-    # username = request.form['username']
-    # password = request.form['password']
-    # sql = f"SELECT * FROM users WHERE username ='{username}' and password = '{password}'"
-    # Model.cur.execute(sql)
-    # res = Model.cur.fetchone()
-    
-    # return "post";
     if request.method=='GET':
         return render_template('login.html')
     
@@ -36,30 +27,193 @@ def login():
         try:
             username = request.form['username']
             password = request.form['password']
-            sql = f"SELECT * FROM users where username = '{username}' and password = '{password}'"
+            sql = f"SELECT * FROM users where username = '{username}' and password = '{password}' and deleted_at is NULL"
             Model.cur.execute(sql)
             resRow = Model.cur.fetchone()
             if(resRow is None):
                 flash('Wrong Password or Username','danger')
                 return redirect(url_for('login'))
-            resColumn = Model.cur.column_names
-            resData  = dict(zip(resColumn,resRow))
-            print(resData)
+            # resColumn = Model.cur.column_names
+            # resData  = dict(zip(resColumn,resRow))
+            # print(resData)
             session['is_login'] = True
-            session['users_id'] = resData['users_id']
-            session['username'] = resData['username']
+            session['users_id'] = resRow['users_id']
+            session['username'] = resRow['username']
             return redirect(url_for('index'))
         except Exception as e:
             print(e)
             flash('Server Error','danger')
             return redirect(url_for('login'))
-        return "x"
     return render_template('login.html')
         
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for('login'))
+
+@app.route("/karyawan",methods=['GET'])
+@AuthMiddleware.login_required
+def karyawan():
+    if request.method=='GET':
+        data = {
+            'page_title' : 'Karyawan',
+        }
+        try:
+            users_id = session['users_id']
+            sql = f"SELECT * FROM users where users_id = '{users_id}' and deleted_at is NULL"
+            Model.cur.execute(sql)
+            resRow = Model.cur.fetchone()
+            # resColumn = Model.cur.column_names
+            # resData  = dict(zip(resColumn,resRow))
+            # print(resData)
+            print(resRow)
+            data['users'] = resRow
+        except Exception as e:
+            print(e)
+        print(data)
+        return render_template('karyawan/index.html',data=data)
+    return render_template('karyawan/index.html')
+
+@app.route("/absensi",methods=['GET'])
+@AuthMiddleware.login_required
+def absensi():
+    data = {
+        'page_title' : 'Absensi',
+    }
+    if request.method=='GET':
+        data = {
+            'page_title' : 'Absensi',
+        }
+        try:
+            users_id = session['users_id']
+            sql = f"SELECT * FROM absensis where user_id = '{users_id}' and deleted_at is NULL"
+            Model.cur.execute(sql)
+            resRow = Model.cur.fetchall()
+            print(resRow)
+            data['absensis'] = resRow
+        except Exception as e:
+            print(e)
+        print(data)
+        return render_template('absensi/index.html',data=data)
+    return render_template('absensi/index.html',data=data)
+
+
+
+@app.route("/absensi/add",methods=['GET','POST'])
+@AuthMiddleware.login_required
+def absensi_add():
+    data = {
+        'page_title' : 'Tambah Absensi',
+    }
+    if request.method=='GET':
+        # try:
+        #     data = {
+        #         'page_title' : 'Tambah Absensi',
+        #     }
+        # except Exception as e:
+        #     print(e)
+        #     flash('Error Access Add Absensi')
+        #     return redirect(url_for('absensi'))
+        # return render_template('absensi/add.html',data=data)
+        return redirect(url_for('absensi'))
+    if request.method=='POST':
+        data = {
+            'page_title' : 'Tambah Absensi',
+        }
+        users_id = session['users_id']
+        try:
+            if(request.form.get('check') is None):
+                pass
+            if(request.form['check'] == 'in'):
+                today = str(datetime.date.today())
+                sql = f"SELECT * FROM absensis where date(check_in) = '{today}' and user_id = '{users_id}' and deleted_at is NULL"
+                print(sql)
+                Model.cur.execute(sql)
+                rowCount = Model.cur.rowcount
+                print(rowCount)
+                if(rowCount > 0):
+                    msg = f"anda sudah check in hari ini";
+                    flash(msg,'danger')
+                    return redirect(url_for('absensi'))
+                check_in = str(datetime.datetime.now())
+                created_at = str(datetime.datetime.now())
+                sql = f"INSERT INTO absensis VALUES(NULL,'{users_id}','{check_in}',NULL,'{created_at}',NULL)"
+                Model.cur.execute(sql)
+                if(Model.cur.rowcount):
+                    msg = f"{Model.cur.rowcount} row inserted";
+                    flash(msg,'success')
+                else:
+                    msg = f"checkin failed";
+                    flash(msg,'danger')
+            if(request.form['check'] == 'out'):
+                check_out = str(datetime.datetime.now())
+                absensi_id = request.form['absensi_id']
+                sql = f"UPDATE absensis SET check_out = '{check_out}' where user_id = '{users_id}' and absensis_id = '{absensi_id}'"
+                Model.cur.execute(sql)
+                if(Model.cur.rowcount):
+                    msg = f"{Model.cur.rowcount} row update";
+                    flash(msg,'success')
+                else:
+                    msg = f"checkout failed";
+                    flash(msg,'danger')
+            return redirect(url_for('absensi'))
+        except Exception as e:
+            print(e)
+            flash('Server Error','danger')
+            return redirect(url_for('absensi'))
+    return redirect(url_for('absensi'))
+
+@app.route("/absensi/delete",methods=['POST'])
+@AuthMiddleware.login_required
+def absensi_delete():
+    data = {
+        'page_title' : 'Delete Absensi',
+    }
+    if request.method=='POST':
+        data = {
+            'page_title' : 'Delete Absensi',
+        }
+        try:
+            absensi_id = request.form['absensi_id']
+            user_id = session['users_id']
+            deleted_at = str(datetime.datetime.now())
+            sql = f"UPDATE absensis SET deleted_at = '{deleted_at}' where absensis_id = '{absensi_id}' and user_id = '{user_id}' and deleted_at is NULL"
+            Model.cur.execute(sql)
+            if(Model.cur.rowcount):
+                msg = f"{Model.cur.rowcount} row deleted";
+                flash(msg,'success')
+            else:
+                msg = f"delete failed";
+                flash(msg,'danger')
+            return redirect(url_for('absensi'))
+        except Exception as e:
+            print(e)
+            flash('Server Error','danger')
+            return redirect(url_for('absensi'))
+
+@app.route("/aktivitas",methods=['GET'])
+@AuthMiddleware.login_required
+def aktivitas():
+    if request.method=='GET':
+        data = {
+            'page_title' : 'Aktivitas',
+        }
+        try:
+            users_id = session['users_id']
+            sql = f"SELECT * FROM aktivitass where user_id = '{users_id}' and deleted_at is NULL"
+            Model.cur.execute(sql)
+            resRow = Model.cur.fetchall()
+            # resColumn = Model.cur.column_names
+            # resRowLen = len(resRow)
+            # resData = [ dict(zip(resColumn,resRow[i])) for i in range(resRowLen) ]
+            # print(resData)
+            print(resRow)
+            data['aktivitass'] = resRow
+        except Exception as e:
+            print(e)
+        print(data)
+        return render_template('aktivitas/index.html',data=data)
+    return render_template('aktivitas/index.html')
 
 
 

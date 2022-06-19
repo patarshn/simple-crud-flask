@@ -1,0 +1,50 @@
+{% extends 'partials/layout.html' %}
+
+{% block optional_header %}
+<!-- Custom styles for this page -->
+<link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+<!-- DataTales Example -->
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Nama Aktivitas</th>
+                        <th>Tanggal Aktivitas</th>
+                        <th>Waktu Aktivitas</th>
+                        <th>Status Aktivitas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for aktivitas in data.aktivitass %}
+                    <tr>
+                        <td>{{ aktivitas.aktivitass_id }}</td>
+                        <td>{{ aktivitas.nama_aktivitas }}</td>
+                        <td>{{ aktivitas.tanggal_aktivitas }}</td>
+                        <td>{{ aktivitas.waktu_aktivitas }}</td>
+                        <td>{{ aktivitas.status_aktivitas }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block optional_footer %}
+
+<!-- Page level plugins -->
+<script src="vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+<!-- Page level custom scripts -->
+<script src="js/demo/datatables-demo.js"></script>
+
+{% endblock %}

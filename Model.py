@@ -5,7 +5,7 @@ con = mysql.connector.connect(
   user="root",
   password="",
   database="mig_db",
-  autocommit=True
+  autocommit=True,
 )
 
-cur = con.cursor()
+cur = con.cursor(dictionary=True,buffered= True)

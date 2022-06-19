@@ -321,3 +321,15 @@
 </div>
 
 {% endblock %}
+
+
+{% block optional_footer %}
+
+    <!-- Page level plugins -->
+    <script src="{{ url_for('static',filename='core/') }}vendor/chart.js/Chart.min.js"></script>
+
+    <!-- Page level custom scripts -->
+    <script src="{{ url_for('static',filename='core/') }}js/demo/chart-area-demo.js"></script>
+    <script src="{{ url_for('static',filename='core/') }}js/demo/chart-pie-demo.js"></script>
+
+{% endblock %}

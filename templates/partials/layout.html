@@ -19,7 +19,7 @@
 
     <!-- Custom styles for this template-->
     <link href="{{ url_for('static',filename='core/') }}css/sb-admin-2.min.css" rel="stylesheet">
-
+    {% block optional_header %} {% endblock %}
 </head>
 
 <body id="page-top">
@@ -48,7 +48,7 @@
 
             <!-- Nav Item - Dashboard -->
             <li class="nav-item active">
-                <a class="nav-link" href="index.html">
+                <a class="nav-link" href="{{url_for('index')}}">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
@@ -62,22 +62,22 @@
             </div>
 
             <!-- Nav Item - Charts -->
-            <li class="nav-item">
-                <a class="nav-link" href="charts.html">
+            <!-- <li class="nav-item">
+                <a class="nav-link" href="{{url_for('karyawan')}}">
                     <i class="fas fa-fw fa-chart-area"></i>
                     <span>Karyawan</span></a>
-            </li>
+            </li> -->
 
             <!-- Nav Item - Charts -->
             <li class="nav-item">
-                <a class="nav-link" href="charts.html">
+                <a class="nav-link" href="{{url_for('absensi')}}">
                     <i class="fas fa-fw fa-chart-area"></i>
                     <span>Absensi</span></a>
             </li>
 
             <!-- Nav Item - Tables -->
             <li class="nav-item">
-                <a class="nav-link" href="tables.html">
+                <a class="nav-link" href="{{url_for('aktivitas')}}">
                     <i class="fas fa-fw fa-table"></i>
                     <span>Aktivitas</span></a>
             </li>
@@ -161,13 +161,9 @@
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="{{url_for('karyawan')}}">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Profile
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Settings
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
@@ -189,6 +185,13 @@
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
                         <h1 class="h3 mb-0 text-gray-800">{{ data.page_title or 'page_title'}}</h1>
                     </div>
+                    {% with messages=get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category,message in messages %}
+                                <div class='alert alert-{{category}}'>{{message}}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
 
                     {% block content %} {% endblock %}
 
@@ -249,13 +252,8 @@
     <!-- Custom scripts for all pages-->
     <script src="{{ url_for('static',filename='core/') }}js/sb-admin-2.min.js"></script>
 
-    <!-- Page level plugins -->
-    <script src="{{ url_for('static',filename='core/') }}vendor/chart.js/Chart.min.js"></script>
 
-    <!-- Page level custom scripts -->
-    <script src="{{ url_for('static',filename='core/') }}js/demo/chart-area-demo.js"></script>
-    <script src="{{ url_for('static',filename='core/') }}js/demo/chart-pie-demo.js"></script>
-
+    {% block optional_footer %} {% endblock %}
 </body>
 
 </html>

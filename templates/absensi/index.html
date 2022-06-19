@@ -1,0 +1,151 @@
+{% extends 'partials/layout.html' %}
+
+{% block optional_header %}
+<!-- Custom styles for this page -->
+<link href="{{ url_for('static',filename='core/') }}vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+
+<div class="row pb-4">
+    <div class="col-12">
+        <form action="{{ url_for('absensi_add') }}" method="POST">
+            <input type="hidden" name="check" value="in">
+            <button type="submit" class="btn btn-primary float-right"><i class="fa fa-plus"></i> Input Absen</button>
+        </form>
+    </div>
+</div>
+
+<!-- DataTales Example -->
+<div class="card shadow mb-4">
+    <!-- <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">DataTables Example</h6>
+    </div> -->
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Absen Id</th>
+                        <th>Check In</th>
+                        <th>Check Out</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for absensi in data.absensis %}
+                    <tr>
+                        <td>{{ absensi.absensis_id }}</td>
+                        <td>{{ absensi.check_in }}</td>
+                        <td>
+                            {% if absensi.check_out is none %}
+                                <div class="px-1">
+                                    <button class="btn btn-success" data-toggle="modal" data-target="#checkoutModal"
+                                    data-id="{{ absensi.absensis_id }}"><i class="fa fa-edit"></i> Checkout</button>
+                                </div>
+                            {% else %}
+                                {{ absensi.check_out }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex">
+                                <div class="px-1">
+                                    <button class="btn btn-danger" data-toggle="modal" data-target="#deleteModal"
+                                        data-id="{{ absensi.absensis_id }}"><i class="fa fa-trash"></i></button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Modal Delete</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Delete data with id : <span id="delete-text-id"></span>
+                <form action="{{ url_for('absensi_delete') }}" method="POST">
+                    <input type="hidden" name="absensi_id" id="delete_id">
+                    <input type="submit" class="btn btn-danger float-right" value="Delete">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="checkoutModal" tabindex="-1" role="dialog" aria-labelledby="checkoutModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="checkoutModalLabel">Modal Checkout</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Delete data with id : <span id="checkout-text-id"></span>
+                <form action="{{ url_for('absensi_add') }}" method="POST">
+                    <input type="hidden" name="absensi_id" id="checkout_id">
+                    <input type="hidden" name="check" value="out">
+                    <input type="submit" class="btn btn-success float-right" value="Checkout">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block optional_footer %}
+
+<!-- Page level plugins -->
+<script src="{{ url_for('static',filename='core/') }}vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="{{ url_for('static',filename='core/') }}vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+<!-- Page level custom scripts -->
+<script src="{{ url_for('static',filename='core/') }}js/demo/datatables-demo.js"></script>
+
+<script>
+    $('#deleteModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var absensi_id = button.data('id') // Extract info from data-* attributes
+        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+        // var modal = $(this)
+        // modal.find('.modal-title').text('New message to ' + recipient)
+        // modal.find('.modal-body input').val(recipient)
+        $('#delete-text-id').html(absensi_id)
+        $('#delete_id').val(absensi_id)
+    })
+
+    $('#checkoutModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var absensi_id = button.data('id') // Extract info from data-* attributes
+        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+        // var modal = $(this)
+        // modal.find('.modal-title').text('New message to ' + recipient)
+        // modal.find('.modal-body input').val(recipient)
+        $('#checkout-text-id').html(absensi_id)
+        $('#checkout_id').val(absensi_id)
+    })
+</script>
+
+
+{% endblock %}
