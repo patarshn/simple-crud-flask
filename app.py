@@ -327,7 +327,7 @@ def aktivitas_delete():
             return redirect(url_for('aktivitas'))
 
 if __name__=='__main__':
-    sess.init_app(app)
+    # sess.init_app(app)
     app.debug = True
     app.run()
 
